@@ -3,7 +3,6 @@ if __name__ == '__main__':
     from dash import dcc, html
     import plotly.graph_objs as go
     from datetime import datetime
-    import pandas as pd
     
     app = dash.Dash(__name__)
 
@@ -28,7 +27,7 @@ if __name__ == '__main__':
     ))
     
     fig.update_layout(
-        title="BTC/USD Candlestick Chart",
+        title="BTC/USD Candlestick Chart, current price: " + str(closes[0]) +" USD, candle every 15 minutes",
         xaxis_title="Date",
         yaxis_title="Price (USD)"
     )
