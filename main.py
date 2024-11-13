@@ -2,35 +2,41 @@ if __name__ == '__main__':
     import dash, requests
     from dash import dcc, html
     import plotly.graph_objs as go
-    import plotly.express as px
+    from datetime import datetime
+    import pandas as pd
+    
+    app = dash.Dash(__name__)
 
-    base_url = "https://api.sandbox.gemini.com/v2/candles/btcusd/1m"
+    base_url = "https://api.gemini.com/v2/candles/btcusd/15m"
     response = requests.get(base_url)
     btc_data = response.json()
     
-    changes = [item[1] for item in btc_data]
-    indexes = list(range(1, len(changes) + 1))
+    timestamps = [entry[0] for entry in btc_data]
+    opens = [entry[1] for entry in btc_data]
+    highs = [entry[2] for entry in btc_data]
+    lows = [entry[3] for entry in btc_data]
+    closes = [entry[4] for entry in btc_data]
+    
+    dates = [datetime.utcfromtimestamp(ts/1000) for ts in timestamps]
 
-    app = dash.Dash(__name__)
+    fig = go.Figure(data=go.Candlestick(
+        x=dates,
+        open=opens,
+        high=highs,
+        low=lows,
+        close=closes
+    ))
+    
+    fig.update_layout(
+        title="BTC/USD Candlestick Chart",
+        xaxis_title="Date",
+        yaxis_title="Price (USD)"
+    )
 
     app.layout = html.Div([
         dcc.Graph(
-            id='changes-line-chart',
-            figure={
-                'data': [
-                    go.Scatter(
-                        x=indexes,
-                        y=changes,
-                        mode='lines+markers',
-                        name='Cena'
-                    )
-                ],
-                'layout': go.Layout(
-                    title='BTC/USD current price = ' + str(btc_data[0][1]) + ' USD (1min candle)',
-                    xaxis={'autorange': 'reversed'},
-                    yaxis={'title': 'Price (USD)'},
-                )
-            }
+            id='candlestick-chart',
+            figure=fig
         )
     ])
 
